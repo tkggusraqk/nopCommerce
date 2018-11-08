@@ -96,6 +96,16 @@ namespace Nop.Plugin.ExternalAuth.Facebook.Controllers
             return Configure();
         }
 
+        [Route("signin-facebook")]
+        public IActionResult SigninFactbook()
+        {
+            if (Request.Query.ContainsKey("error"))
+            {
+                return RedirectToAction("Login", "Customer");
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
         public IActionResult Login(string returnUrl)
         {
             if (!_externalAuthenticationService.ExternalAuthenticationMethodIsAvailable(FacebookAuthenticationDefaults.ProviderSystemName))
