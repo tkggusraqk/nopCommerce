@@ -15,5 +15,12 @@ namespace Nop.Web.Framework.Models
         /// Gets or sets a page size
         /// </summary>
         int PageSize { get; set; }
+
+
+        string Draw { get; set; }
+
+        int Start { get; set; }
+
+        int Length { get; set; }
     }
 }

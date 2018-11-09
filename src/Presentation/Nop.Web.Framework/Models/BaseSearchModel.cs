@@ -15,6 +15,10 @@ namespace Nop.Web.Framework.Models
             //set the default values
             this.Page = 1;
             this.PageSize = 10;
+
+            this.Draw = "";
+            this.Start = 0;
+            this.Length = 0;
         }
 
         #endregion
@@ -35,6 +39,12 @@ namespace Nop.Web.Framework.Models
         /// Gets or sets a comma-separated list of available page sizes
         /// </summary>
         public string AvailablePageSizes { get; set; }
+
+        public string Draw { get; set; }
+
+        public int Start { get; set; }
+
+        public int Length { get; set; }
 
         #endregion
 

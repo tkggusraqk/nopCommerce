@@ -113,12 +113,31 @@ namespace Nop.Web.Areas.Admin.Controllers
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageActivityLog))
                 return AccessDeniedKendoGridJson();
 
-            //prepare model
-            var model = _activityLogModelFactory.PrepareActivityLogListModel(searchModel);
+                #region Sort ??
+                /*
+                // Sort Column Name  
+                var sortColumn = Request.Form["columns[" + Request.Form["order[0][column]"].FirstOrDefault() + "][name]"].FirstOrDefault();
+                // Sort Column Direction ( asc ,desc)  
+                var sortColumnDirection = Request.Form["order[0][dir]"].FirstOrDefault();
+                // Search Value from (Search box)  
+                var searchValue = Request.Form["search[value]"].FirstOrDefault();
+                */
+                #endregion
 
-            return Json(model);
+                // Getting all data  
+                var model = _activityLogModelFactory.PrepareActivityLogListModel(searchModel);
+
+            //Returning Json Data  
+            return Json(new { draw = searchModel.Draw, recordsFiltered = model.Total, recordsTotal = model.Total, data = model.Data });
+
+            
+            ////prepare model
+            //var model = _activityLogModelFactory.PrepareActivityLogListModel(searchModel);
+
+            //return Json(model);
         }
 
+        [HttpPost]
         public virtual IActionResult AcivityLogDelete(int id)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageActivityLog))
