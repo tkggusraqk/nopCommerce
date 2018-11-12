@@ -40,6 +40,8 @@ namespace Nop.Services.Common
         /// <returns>Attributes</returns>
         string AddAddressAttribute(string attributesXml, AddressAttribute attribute, string value);
 
+        IList<AddressAttribute> GetEmptyAttributes(string clientAttributesXml);
+
         /// <summary>
         /// Validates address attributes
         /// </summary>

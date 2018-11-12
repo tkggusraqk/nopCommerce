@@ -250,6 +250,18 @@ namespace Nop.Services.Common
             return result;
         }
 
+        public virtual IList<AddressAttribute> GetEmptyAttributes(string clientAttributesXml)
+        {
+            var clientAttributes = ParseAddressAttributes(clientAttributesXml);
+
+            return _addressAttributeService.GetAllAddressAttributes()
+                .Where(attr => attr.IsRequired)
+                .Except(clientAttributes
+                    .Where(attr => ParseValues(clientAttributesXml, attr.Id)
+                        .Any(val => !string.IsNullOrWhiteSpace(val))))
+                .ToList();
+        }
+
         /// <summary>
         /// Validates address attributes
         /// </summary>
@@ -257,40 +269,10 @@ namespace Nop.Services.Common
         /// <returns>Warnings</returns>
         public virtual IList<string> GetAttributeWarnings(string attributesXml)
         {
-            var warnings = new List<string>();
-
-            //ensure it's our attributes
-            var attributes1 = ParseAddressAttributes(attributesXml);
-
-            //validate required address attributes (whether they're chosen/selected/entered)
-            var attributes2 = _addressAttributeService.GetAllAddressAttributes();
-            foreach (var a2 in attributes2)
-            {
-                if (!a2.IsRequired) 
-                    continue;
-
-                var found = false;
-                //selected address attributes
-                foreach (var a1 in attributes1)
-                {
-                    if (a1.Id != a2.Id) 
-                        continue;
-
-                    var valuesStr = ParseValues(attributesXml, a1.Id);
-
-                    found = valuesStr.Any(str1 => !string.IsNullOrEmpty(str1.Trim()));
-                }
-                
-                if (found) 
-                    continue;
-
-                //if not found
-                var notFoundWarning = string.Format(_localizationService.GetResource("ShoppingCart.SelectAttribute"), _localizationService.GetLocalized(a2, a => a.Name));
-
-                warnings.Add(notFoundWarning);
-            }
-
-            return warnings;
+            return GetEmptyAttributes(attributesXml)
+                .Select(attr => string.Format(_localizationService.GetResource("ShoppingCart.SelectAttribute"),
+                    _localizationService.GetLocalized(attr, a => a.Name)))
+                .ToList();
         }
 
         /// <summary>

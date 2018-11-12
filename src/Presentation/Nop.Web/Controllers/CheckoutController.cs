@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Nop.Core;
 using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Customers;
@@ -22,9 +23,11 @@ using Nop.Services.Shipping;
 using Nop.Web.Extensions;
 using Nop.Web.Factories;
 using Nop.Web.Framework.Controllers;
+using Nop.Web.Framework.Mvc;
 using Nop.Web.Framework.Mvc.Filters;
 using Nop.Web.Framework.Security;
 using Nop.Web.Models.Checkout;
+using OfficeOpenXml.FormulaParsing.Exceptions;
 
 namespace Nop.Web.Controllers
 {
@@ -1111,6 +1114,20 @@ namespace Nop.Web.Controllers
             return View(model);
         }
 
+        public virtual IActionResult OpcCheckCustomAttributes(int billingAddressId)
+        {
+            var address = _workContext.CurrentCustomer.Addresses.FirstOrDefault(a => a.Id == billingAddressId);
+            if (address == null)
+                return new NullJsonResult();
+
+            var invalidCustomAttributes = _addressAttributeParser.GetEmptyAttributes(address.CustomAttributes);
+
+            return Json(JsonConvert.SerializeObject(invalidCustomAttributes, new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            }));
+        }
+
         public virtual IActionResult OpcSaveBilling(CheckoutBillingAddressModel model)
         {
             try
@@ -1136,10 +1153,7 @@ namespace Nop.Web.Controllers
                 {
                     //existing address
                     var address = _workContext.CurrentCustomer.Addresses.FirstOrDefault(a => a.Id == billingAddressId);
-                    if (address == null)
-                        throw new Exception("Address can't be loaded");
-
-                    _workContext.CurrentCustomer.BillingAddress = address;
+                    _workContext.CurrentCustomer.BillingAddress = address ?? throw new Exception("Address can't be loaded");
                     _customerService.UpdateCustomer(_workContext.CurrentCustomer);
                 }
                 else
